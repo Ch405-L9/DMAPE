@@ -38,11 +38,5 @@ jobs:
           commit-message: "DMAPE auto: add versioned prompt"
           body: |
             This PR was generated automatically by DMAPE.
-
-            Trigger:
-            - Change detected under prompts/base/
-
-            Guarantees:
-            - Base prompts were not modified
-            - New version created under prompts/versions/
-            - No deployment occurred
+            Base prompts were not modified.
+            New version created under prompts/versions/.
