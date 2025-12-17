@@ -5,6 +5,8 @@ MODEL="dmape-qwen"
 BASE_DIR="prompts/base"
 VERSIONS_DIR="prompts/versions"
 SCHEMA="governance/dmape_output.schema.json"
+GOV_VERSION="dmape-laws-1.0"
+STAGE="dmape.generate.v1"
 
 command -v ollama >/dev/null 2>&1 || { echo "ollama not found"; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo "jq not found"; exit 1; }
@@ -27,7 +29,7 @@ STRICT OUTPUT RULES:
 - Do NOT add commentary
 
 HARD REQUIREMENTS:
-- user_md MUST be non-empty and rewritten
+- user_md MUST be rewritten and non-empty
 - system_md MUST define system rules
 - metadata_json.model MUST be "dmape-qwen"
 
@@ -39,7 +41,7 @@ Required keys:
 metadata_json must include:
 - version
 - base_file
-- generated_at_utc (UTC ISO-8601)
+- generated_at_utc
 - model
 
 Base prompt:
@@ -53,7 +55,6 @@ RAW_RESPONSE="$(echo "$PROMPT" | ollama run "$MODEL")"
 
 CLEAN_RESPONSE="$(echo "$RAW_RESPONSE" | sed -e 's/^```json//' -e 's/^```//' -e 's/```$//')"
 
-# Validate JSON syntax
 if ! echo "$CLEAN_RESPONSE" | jq . > "$TMP_JSON" 2>/dev/null; then
   echo "ERROR: Model output is not valid JSON"
   echo "$RAW_RESPONSE"
@@ -61,14 +62,32 @@ if ! echo "$CLEAN_RESPONSE" | jq . > "$TMP_JSON" 2>/dev/null; then
   exit 1
 fi
 
-# Validate against schema using Python
+# Inject provenance (system-authored, not model-authored)
+jq --arg stage "$STAGE" \
+   --arg gov "$GOV_VERSION" \
+   --arg base "$BASE_FILE" \
+   '.metadata_json.provenance = {
+      stage: $stage,
+      laws_applied: [
+        "json_only_output",
+        "schema_enforced",
+        "model_identity_locked",
+        "non_empty_user_md",
+        "no_markdown"
+      ],
+      governance_version: $gov,
+      transformation_type: "prompt_compilation",
+      source_base_prompt: $base
+    }' "$TMP_JSON" > "${TMP_JSON}.prov"
+
+mv "${TMP_JSON}.prov" "$TMP_JSON"
+
 python3 - << PYCODE
 import json, sys
-from jsonschema import validate, Draft7Validator
+from jsonschema import Draft7Validator
 
 with open("$SCHEMA") as s:
     schema = json.load(s)
-
 with open("$TMP_JSON") as d:
     data = json.load(d)
 
@@ -80,11 +99,10 @@ if errors:
     sys.exit(1)
 PYCODE
 
-# Write outputs
 jq -r '.system_md' "$TMP_JSON" > "$OUT_DIR/system.md"
 jq -r '.user_md' "$TMP_JSON" > "$OUT_DIR/user.md"
 jq '.metadata_json' "$TMP_JSON" > "$OUT_DIR/metadata.json"
 
 rm -f "$TMP_JSON"
 
-echo "DMAPE version created at $OUT_DIR (schema validated, model locked)"
+echo "DMAPE version created at $OUT_DIR (schema validated, provenance injected)"

@@ -1,57 +1,50 @@
-DMAPE
-Developer Mode Advanced Prompt Engineering
+# DMAPE — Developer Mode Advanced Prompt Engineering
 
-Purpose
-DMAPE is a production-grade framework for designing, testing, grading,
-and deploying prompts as governed artifacts. Prompts are treated as
-code and evaluated through adversarial testing, fairness analysis,
-constitutional constraints, and CI/CD pipelines.
+DMAPE is a local, governed prompt compiler.
 
-Core Principles
-- Prompts are versioned
-- DRY RUN is default
-- Safety overrides helpfulness
-- Fairness is enforced
-- Adversarial resistance is mandatory
-- Rollback is always available
+It transforms base prompts into structured, versioned prompt artifacts using
+strict enforcement, schema validation, and system-authored provenance.
 
-Directory Overview
-prompts
-  base        Immutable source prompts
-  enhanced    Master-enhanced prompts
-  versions    Versioned production prompts
+## Core Principles
 
-governance
-  Constitutional principles
-  Grading rubric
-  Adversarial taxonomy
+- Prompts are untrusted inputs
+- Models are generators, not authorities
+- Laws are enforced structurally, not rhetorically
+- All outputs are deterministic and auditable
+- No implicit execution
+- No hidden automation
 
-workflows
-  Phase maps
-  Gate definitions
-  Premortem analysis
+## Lifecycle
 
-evals
-  Golden datasets
-  Adversarial tests
-  Fairness tests
+1. Author or update a base prompt in `prompts/base/`
+2. Run the compiler explicitly:
+   ./scripts/local_generate_version.sh
+3. Output is generated in `prompts/versions/`
+4. Each artifact includes:
+   - system.md
+   - user.md
+   - metadata.json with provenance
 
-ci
-  Test
-  Deploy
-  Rollback
+## Governance
 
-How to Use
-1. Place base prompt in prompts/base
-2. Apply enhanced templates from prompts/enhanced
-3. Create new version under prompts/versions/vX.Y.Z
-4. Run adversarial and fairness tests
-5. Grade output
-6. Deploy via DRY RUN
-7. Promote via gated approval
+- Output must be valid JSON
+- Schema enforcement is mandatory
+- Model identity is locked
+- Provenance is injected by the system
+- Generated artifacts are not committed by default
 
-Default Mode
-All executions are DRY RUN unless explicitly approved.
+## Execution Model
 
-Status
-DMAPE is a living system. Weekly review is mandatory.
+DMAPE does not auto-run on file write or git push.
+Execution is explicit by design.
+
+Automation layers (git hooks, CI, PR generation) are optional extensions
+and intentionally excluded from the foundation.
+
+## Status
+
+Foundation complete.
+Ready for higher-order stages:
+- Review agents
+- Promotion pipelines
+- Semantic diffing
