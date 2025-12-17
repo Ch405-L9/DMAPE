@@ -1,0 +1,12 @@
+{
+  "minimum_compliance_score": 0.90,
+  "max_violations_allowed": 0,
+  "max_warnings_allowed": 2,
+  "required_laws": [
+    "json_only_output",
+    "schema_enforced",
+    "model_identity_locked",
+    "non_empty_user_md",
+    "no_markdown"
+  ]
+}

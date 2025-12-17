@@ -1,0 +1,31 @@
+name: DMAPE Promotion Gate
+
+on:
+  pull_request:
+    paths:
+      - "prompts/**"
+      - "scripts/**"
+      - "governance/**"
+
+jobs:
+  dmape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Promotion Check
+        run: |
+          python3 scripts/promote_version.py $(ls artifacts/status | tail -n 1)
+
+      - name: Block on Quarantine
+        run: |
+          STATUS=$(jq -r '.promotion_status' artifacts/status/*/status.json | tail -n 1)
+          if [ "$STATUS" = "quarantine" ]; then
+            echo "❌ DMAPE quarantine"
+            exit 1
+          fi

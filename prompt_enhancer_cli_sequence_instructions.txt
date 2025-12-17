@@ -1,0 +1,43 @@
+Canonical CLI sequence (from scratch, copy-pasteable)
+
+Below is the authoritative CLI flow, including cd, exactly as you asked.
+
+A. Enter the repo
+cd ~
+cd DMAPE
+
+B. Add or update a base prompt
+nano prompts/base/my_new_prompt.md
+
+
+(or copy one in)
+
+cp ~/Downloads/prompt.md prompts/base/
+
+C. Generate an enhanced version
+./scripts/local_generate_version.sh
+
+
+Result:
+
+prompts/versions/vYYYY.MM.DD-HHMM/
+
+D. Review the generated prompt
+./scripts/review_version.sh vYYYY.MM.DD-HHMM
+
+
+Result:
+
+evals/reviews/vYYYY.MM.DD-HHMM/review.json
+
+E. Promote (policy decision)
+./scripts/promote_version.sh vYYYY.MM.DD-HHMM
+
+
+Result:
+
+artifacts/status/vYYYY.MM.DD-HHMM/status.json
+
+F. (Optional) Semantic diff vs previous version
+./scripts/semantic_diff.py vPREVIOUS vYYYY.MM.DD-HHMM
+

@@ -1,3 +1,11 @@
+
+# DMAPE generated artifacts
+prompts/versions/
+
+# Runtime artifacts
+artifacts/
+evals/
+
 !.github/
 !.github/workflows/
 !.github/workflows/*.yml
