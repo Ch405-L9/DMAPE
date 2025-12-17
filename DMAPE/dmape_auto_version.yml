@@ -1,0 +1,48 @@
+name: DMAPE Auto Version
+
+on:
+  push:
+    paths:
+      - "prompts/base/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+jobs:
+  generate-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate versioned prompt from base
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/create_version_from_base.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: dmape/auto-version
+          delete-branch: true
+          title: "DMAPE auto: create versioned prompt from base"
+          commit-message: "DMAPE auto: add versioned prompt"
+          body: |
+            This PR was generated automatically by DMAPE.
+
+            Trigger:
+            - Change detected under prompts/base/
+
+            Guarantees:
+            - Base prompts were not modified
+            - New version created under prompts/versions/
+            - No deployment occurred
