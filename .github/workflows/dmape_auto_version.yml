@@ -13,8 +13,9 @@ permissions:
 jobs:
   generate-version:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -22,7 +23,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Generate versioned prompt files
+      - name: Generate versioned prompt from base
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -33,10 +34,15 @@ jobs:
         with:
           branch: dmape/auto-version
           delete-branch: true
-          title: "DMAPE auto: create new prompt version from base"
+          title: "DMAPE auto: create versioned prompt from base"
+          commit-message: "DMAPE auto: add versioned prompt"
           body: |
             This PR was generated automatically by DMAPE.
-            - Base prompt changes detected under prompts/base/
+
+            Trigger:
+            - Change detected under prompts/base/
+
+            Guarantees:
+            - Base prompts were not modified
             - New version created under prompts/versions/
-            - Base prompt was not modified
-          commit-message: "DMAPE auto: add new versioned prompt files"
+            - No deployment occurred
