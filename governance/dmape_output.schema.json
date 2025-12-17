@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DMAPE Output Schema",
+  "type": "object",
+  "required": ["system_md", "user_md", "metadata_json"],
+  "additionalProperties": false,
+  "properties": {
+    "system_md": {
+      "type": "string",
+      "minLength": 10
+    },
+    "user_md": {
+      "type": "string",
+      "minLength": 10
+    },
+    "metadata_json": {
+      "type": "object",
+      "required": [
+        "version",
+        "base_file",
+        "generated_at_utc",
+        "model"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "base_file": {
+          "type": "string"
+        },
+        "generated_at_utc": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        },
+        "model": {
+          "type": "string",
+          "enum": ["dmape-qwen"]
+        }
+      }
+    }
+  }
+}
