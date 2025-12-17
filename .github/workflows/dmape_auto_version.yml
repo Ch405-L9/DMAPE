@@ -1,20 +1,17 @@
 name: DMAPE Auto Version
 
 on:
-  push:
+  pull_request:
     paths:
       - "prompts/base/**"
 
 permissions:
   contents: write
   pull-requests: write
-  models: read
 
 jobs:
-  dmape:
-    if: github.actor != 'dmape-bot'
-    runs-on: ubuntu-latest
   generate-version:
+    if: github.actor != 'dmape-bot'
     runs-on: ubuntu-latest
 
     steps:
@@ -27,28 +24,37 @@ jobs:
           python-version: "3.11"
 
       - name: Generate versioned prompt from base
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/create_version_from_base.py
+          ./scripts/local_generate_version.sh
 
-      - name: Create Pull Request
+      - name: Review latest version
+        run: |
+          LATEST=$(ls prompts/versions | tail -n 1)
+          ./scripts/review_version.sh "$LATEST"
+
+      - name: Promote latest version
+        run: |
+          LATEST=$(ls prompts/versions | tail -n 1)
+          ./scripts/promote_version.sh "$LATEST"
+
+      - name: Block on quarantine
+        run: |
+          STATUS=$(jq -r '.promotion_status' artifacts/status/*/status.json | tail -n 1)
+          if [ "$STATUS" = "quarantine" ]; then
+            echo "❌ DMAPE quarantined this prompt"
+            exit 1
+          fi
+
+      - name: Create Pull Request with enhanced prompt
         uses: peter-evans/create-pull-request@v6
         with:
           branch: dmape/auto-version
           delete-branch: true
-          title: "DMAPE auto: create versioned prompt from base"
-          commit-message: "DMAPE auto: add versioned prompt"
+          title: "DMAPE auto: enhanced prompt version"
+          commit-message: "DMAPE auto: add enhanced prompt version"
           body: |
             This PR was generated automatically by DMAPE.
-            Base prompts were not modified.
-            New version created under prompts/versions/.
 
-      - name: Commit generated prompts
-        run: |
-          git config user.name "dmape-bot"
-          git config user.email "dmape@users.noreply.github.com"
-          git add prompts/versions
-          git commit -m "DMAPE: auto-generate enhanced prompt versions" || true
-          git push
-      
+            - Base prompts unchanged
+            - Enhanced prompt added under prompts/versions/
+            - Review + promotion gates passed
