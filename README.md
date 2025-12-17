@@ -1,50 +1,79 @@
 # DMAPE — Developer Mode Advanced Prompt Engineering
 
-DMAPE is a local, governed prompt compiler.
+DMAPE is a governed, local-first PromptOps system for transforming base prompts into enhanced, versioned, auditable prompt artifacts.
 
-It transforms base prompts into structured, versioned prompt artifacts using
-strict enforcement, schema validation, and system-authored provenance.
+It enforces:
+- Deterministic generation
+- Schema validation
+- Provenance tracking
+- Independent review
+- Policy-based promotion
 
-## Core Principles
+No cloud dependency required.
 
-- Prompts are untrusted inputs
-- Models are generators, not authorities
-- Laws are enforced structurally, not rhetorically
-- All outputs are deterministic and auditable
-- No implicit execution
-- No hidden automation
+---
 
-## Lifecycle
+## Directory Overview
 
-1. Author or update a base prompt in `prompts/base/`
-2. Run the compiler explicitly:
+prompts/base/        Base prompts (input)
+prompts/versions/    Enhanced, versioned outputs
+scripts/             CLI tools
+governance/          Schemas and laws
+evals/reviews/       Review artifacts
+artifacts/status/    Promotion decisions
+artifacts/diffs/     Semantic diffs
+
+---
+
+## Core Workflow (CLI)
+
+1. Add a base prompt
+   prompts/base/my_prompt.md
+
+2. Generate enhanced version
    ./scripts/local_generate_version.sh
-3. Output is generated in `prompts/versions/`
-4. Each artifact includes:
-   - system.md
-   - user.md
-   - metadata.json with provenance
 
-## Governance
+3. Review output
+   ./scripts/review_version.sh <version>
 
-- Output must be valid JSON
-- Schema enforcement is mandatory
-- Model identity is locked
-- Provenance is injected by the system
-- Generated artifacts are not committed by default
+4. Promote or quarantine
+   ./scripts/promote_version.sh <version>
 
-## Execution Model
+5. Optional semantic diff
+   ./scripts/semantic_diff.py <old> <new>
 
-DMAPE does not auto-run on file write or git push.
-Execution is explicit by design.
+---
 
-Automation layers (git hooks, CI, PR generation) are optional extensions
-and intentionally excluded from the foundation.
+## What DMAPE Produces
+
+For each version:
+- system.md     Enhanced system rules
+- user.md       Enhanced user prompt
+- metadata.json Provenance and governance
+- status.json   Promotion decision
+
+---
+
+## Promotion States
+
+- promote
+- review_required
+- quarantine
+
+Promotion decisions are policy-driven and deterministic.
+
+---
+
+## Design Principles
+
+- Local-first
+- No silent mutation
+- Explicit contracts
+- Fail-closed governance
+- Tooling over opinion
+
+---
 
 ## Status
 
-Foundation complete.
-Ready for higher-order stages:
-- Review agents
-- Promotion pipelines
-- Semantic diffing
+Production-ready.
